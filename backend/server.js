@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectMongoDB from "./db/connectMongoDB.js";
+import postRoutes from "./routes/post.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import cookieParser from "cookie-parser";
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true })); // to parse form data in req.bo
 app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
 
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
