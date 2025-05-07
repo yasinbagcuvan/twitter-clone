@@ -11,12 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
 
 function App() {
-  const {
-    data: authUser,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data: authUser, isLoading } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
       try {
@@ -24,9 +19,9 @@ function App() {
         const data = await res.json();
         if (data.error) return null;
         if (!res.ok) {
-          throw new Error(data.error || "Failed to fetch user");
+          throw new Error(data.error || "Something went wrong");
         }
-        console.log("AuthUser is here:", data);
+        console.log("authUser is here:", data);
         return data;
       } catch (error) {
         throw new Error(error);
