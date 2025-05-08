@@ -9,11 +9,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner.jsx";
 import { formatPostDate } from "../../utils/date/index.js";
+import { useAuth } from "../../context/AuthContext.js";
 
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
+  //const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const authUser = useAuth();
 
   const postOwner = post.user;
   const isLiked = post.likes.includes(authUser._id);

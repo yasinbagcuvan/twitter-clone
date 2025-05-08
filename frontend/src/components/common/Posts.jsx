@@ -34,6 +34,7 @@ const Posts = ({ feedType, username, userId }) => {
       if (!res.ok) throw new Error(data.error || "Failed to fetch posts");
       return data;
     },
+    refetchOnWindowFocus: true,
   });
 
   useEffect(() => {

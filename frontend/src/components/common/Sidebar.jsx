@@ -6,10 +6,13 @@ import { Link } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 
 const Sidebar = () => {
   const queryClient = useQueryClient();
 
+  //const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const authUser = useAuth();
   // Notification Count Query
   const { data: notificationCount } = useQuery({
     queryKey: ["notificationCount"],
@@ -52,8 +55,6 @@ const Sidebar = () => {
       toast.error("Failed to logout");
     },
   });
-
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
   const { mutate: markNotificationsRead } = useMutation({
     mutationFn: async () => {
