@@ -79,6 +79,7 @@ export const commentPost = async (req, res) => {
     };
     post.comments.push(comment);
     await post.save();
+    await post.populate("comments.user", "-password");
     res.status(200).json(post);
   } catch (error) {
     console.log("Error in commentPost controller", error.message);
