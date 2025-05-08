@@ -1,5 +1,4 @@
 import XSvg from "../svgs/X";
-
 import { MdHomeFilled } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
@@ -10,6 +9,24 @@ import { toast } from "react-hot-toast";
 
 const Sidebar = () => {
   const queryClient = useQueryClient();
+
+  // Notification Count Query
+  const { data: notificationCount } = useQuery({
+    queryKey: ["notificationCount"],
+    queryFn: async () => {
+      const res = await fetch("/api/notifications/count");
+      const data = await res.json();
+
+      if (!res.ok || typeof data.count !== "number") {
+        throw new Error(data.error || "Failed to fetch notification count");
+      }
+
+      return data.count;
+    },
+    refetchOnWindowFocus: true,
+  });
+
+  // Logout Mutation
   const { mutate } = useMutation({
     mutationFn: async () => {
       try {
@@ -38,6 +55,28 @@ const Sidebar = () => {
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
+  const { mutate: markNotificationsRead } = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/notifications/mark-read", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.error || "Failed to mark notifications as read");
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(["notificationCount"], 0);
+      toast.success("Notifications marked as read");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   return (
     <div className="md:flex-[2_2_0] w-18 max-w-52">
       <div className="sticky top-0 left-0 h-screen flex flex-col border-r border-gray-700 w-20 md:w-full">
@@ -54,13 +93,22 @@ const Sidebar = () => {
               <span className="text-lg hidden md:block">Home</span>
             </Link>
           </li>
-          <li className="flex justify-center md:justify-start">
+
+          <li className="flex justify-center md:justify-start relative">
             <Link
               to="/notifications"
               className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer"
+              onClick={notificationCount > 0 && markNotificationsRead}
             >
               <IoNotifications className="w-6 h-6" />
               <span className="text-lg hidden md:block">Notifications</span>
+
+              {/* Show notification count if greater than 0 */}
+              {notificationCount > 0 && (
+                <span className="bg-red-500 text-white text-xs font-bold rounded-full absolute top-0 right-0 transform translate-x-0 translate-y-3 px-2 py-1 mr-7">
+                  {notificationCount}
+                </span>
+              )}
             </Link>
           </li>
 
@@ -74,6 +122,7 @@ const Sidebar = () => {
             </Link>
           </li>
         </ul>
+
         {authUser && (
           <Link
             to={`/profile/${authUser.username}`}
@@ -105,4 +154,5 @@ const Sidebar = () => {
     </div>
   );
 };
+
 export default Sidebar;

@@ -49,3 +49,43 @@ export const deleteNotification = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const getNotificationCount = async (req, res) => {
+  const userId = req.user._id;
+  const count = await Notification.countDocuments({ to: userId, read: false });
+  res.status(200).json({ count });
+};
+
+export const markNotificationsRead = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Kullanıcıya ait tüm bildirimleri okundu olarak işaretle
+    const updatedNotifications = await Notification.updateMany(
+      { to: userId, read: true }, // Kullanıcıya ait ve okunmamış bildirimleri bul
+      { $set: { read: false } } // 'read' alanını true olarak güncelle
+    );
+    console.log("Updated notifications: ", updatedNotifications);
+    const unreadNotifications = await Notification.find({
+      to: userId,
+      read: true,
+    });
+
+    const notificationCount = await Notification.countDocuments({
+      to: userId,
+      read: true,
+    });
+    console.log("Notification count: ", notificationCount);
+
+    console.log("Unread notifications:", unreadNotifications);
+    if (updatedNotifications.modifiedCount === 0) {
+      return res.status(404).json({ error: "No unread notifications found" });
+    }
+
+    // Başarılı bir şekilde güncellenmiş bildirimlerin sayısını döndür
+    res.status(200).json({ message: "Notifications marked as read" });
+  } catch (error) {
+    console.log("Error in markNotificationsRead controller", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
